@@ -20,7 +20,6 @@ import (
 
 	"github.com/kubetrail/cipher/pkg/flags"
 	"github.com/kubetrail/cipher/pkg/run"
-
 	"github.com/spf13/cobra"
 )
 
