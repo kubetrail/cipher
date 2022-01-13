@@ -36,7 +36,7 @@ func init() {
 	f := signCmd.Flags()
 	b := filepath.Base
 
-	f.String(b(flags.KeyFile), "id_rsa", "Private key file")
+	f.String(b(flags.KeyFile), "id_rsa", "Private key file (Env: PRIVATE_KEY)")
 	f.String(b(flags.PlainText), "", "Plaintext file")
 	f.String(b(flags.Signature), "", "Signature file")
 }

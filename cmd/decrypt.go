@@ -36,7 +36,7 @@ func init() {
 	f := decryptCmd.Flags()
 	b := filepath.Base
 
-	f.String(b(flags.KeyFile), "id_rsa", "Private key file")
+	f.String(b(flags.KeyFile), "id_rsa", "Private key file (Env: PRIVATE_KEY)")
 	f.String(b(flags.CipherText), "", "Encrypted ciphertext file")
 	f.String(b(flags.PlainText), "", "Decrypted plaintext file")
 }

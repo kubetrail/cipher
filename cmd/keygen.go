@@ -40,5 +40,5 @@ func init() {
 	f := keygenCmd.Flags()
 	b := filepath.Base
 
-	f.String(b(flags.KeyFile), "id_rsa", "Output name key files")
+	f.String(b(flags.KeyFile), "id_rsa", "Name tag for keypair")
 }

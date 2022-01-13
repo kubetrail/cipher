@@ -36,7 +36,7 @@ func init() {
 	f := verifyCmd.Flags()
 	b := filepath.Base
 
-	f.String(b(flags.KeyFile), "id_rsa.pub", "Public key file")
+	f.String(b(flags.KeyFile), "id_rsa.pub", "Public key file (Env: PUBLIC_KEY)")
 	f.String(b(flags.PlainText), "", "Plaintext file")
 	f.String(b(flags.Signature), "", "Signature file")
 }
