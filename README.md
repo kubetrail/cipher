@@ -50,6 +50,12 @@ the private key is encrypted by KMS:
 cipher keygen
 ```
 
+For ease of use you can set key paths as env. vars:
+```bash
+export PUBLIC_KEY="/path/to/id_rsa.pub"
+export PRIVATE_KEY="/path/to/id_rsa"
+```
+
 ### encrypt data
 Generate a random data first:
 ```bash
