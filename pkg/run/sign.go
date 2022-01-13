@@ -20,6 +20,8 @@ func Sign(cmd *cobra.Command, _ []string) error {
 	_ = viper.BindPFlag(flags.Signature, cmd.Flags().Lookup(filepath.Base(flags.Signature)))
 	_ = viper.BindPFlag(flags.PlainText, cmd.Flags().Lookup(filepath.Base(flags.PlainText)))
 
+	_ = viper.BindEnv(flags.KeyFile, "PRIVATE_KEY")
+
 	keyFile := viper.GetString(flags.KeyFile)
 	signature := viper.GetString(flags.Signature)
 	plainText := viper.GetString(flags.PlainText)
