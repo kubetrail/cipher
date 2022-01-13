@@ -20,7 +20,7 @@ func Decrypt(cmd *cobra.Command, _ []string) error {
 	_ = viper.BindPFlag(flags.CipherText, cmd.Flags().Lookup(filepath.Base(flags.CipherText)))
 	_ = viper.BindPFlag(flags.PlainText, cmd.Flags().Lookup(filepath.Base(flags.PlainText)))
 
-	_ = viper.BindEnv(flags.KeyFile, "PUBLIC_KEY")
+	_ = viper.BindEnv(flags.KeyFile, "PRIVATE_KEY")
 
 	keyFile := viper.GetString(flags.KeyFile)
 	cipherText := viper.GetString(flags.CipherText)
