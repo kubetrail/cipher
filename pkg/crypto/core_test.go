@@ -4,9 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/md5"
+	"crypto/sha256"
 	"math/rand"
 	"os"
+	"sync"
 	"testing"
+
+	"github.com/monnand/dhkx"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 // TestEncryptDecryptData tests if performing the roundtrip
@@ -48,14 +54,9 @@ func TestEncryptDecryptData(t *testing.T) {
 	}
 
 	dataRoundTrip := bPlaintext.Bytes()
-	if len(data) != len(dataRoundTrip) {
-		t.Fatal("data len does not match", len(data), len(dataRoundTrip))
-	}
 
-	for i := range data {
-		if data[i] != dataRoundTrip[i] {
-			t.Fatal("data does not match")
-		}
+	if !bytes.Equal(data, dataRoundTrip) {
+		t.Fatal("data does not match")
 	}
 }
 
@@ -131,14 +132,8 @@ func TestKmsRoundtrip(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(b) != len(key) {
-		t.Fatal("data len do not match")
-	}
-
-	for i := range b {
-		if b[i] != key[i] {
-			t.Fatal("data values do not match")
-		}
+	if !bytes.Equal(b, key) {
+		t.Fatal("data values do not match")
 	}
 }
 
@@ -172,14 +167,8 @@ func TestSignWithPrivateKey(t *testing.T) {
 
 	s2 := bb.Bytes()
 
-	if len(s1) != len(s2) {
-		t.Fatal("sign len does not match")
-	}
-
-	for i := range s1 {
-		if s1[i] != s2[i] {
-			t.Fatal("sign data does not match")
-		}
+	if !bytes.Equal(s1, s2) {
+		t.Fatal("sign data does not match")
 	}
 }
 
@@ -207,5 +196,98 @@ func TestVerifyWithPublicKey(t *testing.T) {
 
 	if err := VerifySignature(r, s, pub); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// https://crypto.stackexchange.com/questions/9509/aes-encryption-using-a-diffie-hellman-key-exchange
+func TestDiffieHellmanKeyExchange(t *testing.T) {
+	bobChan := make(chan []byte)
+	aliceChan := make(chan []byte)
+
+	var aliceKey []byte
+	var bobKey []byte
+
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		// Get a group. Use the default one would be enough.
+		g, _ := dhkx.GetGroup(0)
+
+		// Generate a private key from the group.
+		// Use the default random number generator.
+		priv, _ := g.GeneratePrivateKey(nil)
+
+		// Get the public key from the private key.
+		pub := priv.Bytes()
+
+		go func() {
+			bobChan <- pub
+		}()
+
+		b := <-aliceChan
+
+		key := dhkx.NewPublicKey(b)
+
+		k, _ := g.ComputeKey(key, priv)
+
+		aliceKey = k.Bytes()
+	}()
+
+	go func() {
+		defer wg.Done()
+		// Get a group. Use the default one would be enough.
+		g, _ := dhkx.GetGroup(0)
+
+		// Generate a private key from the group.
+		// Use the default random number generator.
+		priv, _ := g.GeneratePrivateKey(nil)
+
+		// Get the public key from the private key.
+		pub := priv.Bytes()
+
+		go func() {
+			aliceChan <- pub
+		}()
+
+		b := <-bobChan
+
+		key := dhkx.NewPublicKey(b)
+
+		k, _ := g.ComputeKey(key, priv)
+
+		bobKey = k.Bytes()
+	}()
+
+	wg.Wait()
+
+	aliceSalt := md5.Sum(aliceKey)
+	bobSalt := md5.Sum(bobKey)
+	aliceKey = pbkdf2.Key(aliceKey, aliceSalt[:], 4096, 32, sha256.New)
+	bobKey = pbkdf2.Key(bobKey, bobSalt[:], 4096, 32, sha256.New)
+
+	aliceCipher, err := EncryptWithAesKey([]byte("hello"), aliceKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bobCipher, err := EncryptWithAesKey([]byte("hello"), bobKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	alicePlaintext, err := DecryptWithAesKey(bobCipher, aliceKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bobPlaintext, err := DecryptWithAesKey(aliceCipher, bobKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(alicePlaintext, bobPlaintext) {
+		t.Fatal("decrypted messages not same")
 	}
 }
