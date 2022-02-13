@@ -1,5 +1,5 @@
 # cipher
-`cipher` is an industrial grade data encryption tool that uses several
+`cipher` is a data encryption tool that uses several
 layers of encryption. Data is encrypted using data encryption keys (DEK),
 which are in turn encrypted using key encryption key (KEK), which in
 turn is encrypted using Google KMS. This ensures that plaintext keys are
@@ -9,10 +9,14 @@ The tool is also performant splitting the data into chunks and processing
 each chunk concurrently. Furthermore, different types of encryption algorithms
 are uses at different levels to ensure large files can be easily encrypted.
 
-For instance, a 16GB plaintext can be encrypted in under a minute. DEK is
-done using AES and KEK is performed using RSA.
+## disclaimer
+> The use of this tool does not guarantee security or usability for any
+> particular purpose. Please review the code and use at your own risk.
 
 ## installation
+This step assumes you have [Go compiler toolchain](https://go.dev/dl/)
+installed on your system.
+
 Download this repo to a folder and cd to it. Make sure `go` toolchain
 is installed
 ```bash
