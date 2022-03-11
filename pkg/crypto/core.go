@@ -134,6 +134,15 @@ func NewAesKey() ([]byte, error) {
 	return key[:], nil
 }
 
+func GenerateKeyPairReader(reader io.Reader, bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	privkey, err := rsa.GenerateKey(reader, bits)
+	if err != nil {
+		err := fmt.Errorf("could not generate RSA key pair: %w", err)
+		return nil, nil, err
+	}
+	return privkey, &privkey.PublicKey, nil
+}
+
 // GenerateKeyPair generates a new RSA key pair
 func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privkey, err := rsa.GenerateKey(rand.Reader, bits)

@@ -15,6 +15,18 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
+func TestGenerateKeyPairReader(t *testing.T) {
+	b := make([]byte, 2048*64)
+	if _, err := rand.Read(b); err != nil {
+		t.Fatal(err)
+	}
+	br := bufio.NewReader(bytes.NewReader(b))
+
+	if _, _, err := GenerateKeyPairReader(br, DefaultBits2048); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // TestEncryptDecryptData tests if performing the roundtrip
 // of encrypting and then decrypting data matches original data
 func TestEncryptDecryptData(t *testing.T) {
